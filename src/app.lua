@@ -5,9 +5,10 @@ app:get("/", function()
   local versionInfo = require "misc.getVersionInfo"
   return {
     json = {
-      name = "Golden Oak Auth server",
-      branch = versionInfo.getCommit(),
-      commit = ""
+      identity = "Golden Oak Auth server",
+      branch = versionInfo.getBranch(),
+      lastChange = versionInfo.lastChange(),
+      commit = versionInfo.getCommit()
     }
   }
 end)
