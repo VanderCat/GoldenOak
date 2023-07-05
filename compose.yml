@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  goldenoak:
+    build: .
+    volumes:
+      - ./:/app
+    ports:
+      - 9090:9090
+    environment:
+      GOLDENOAK_DEBUG: True
