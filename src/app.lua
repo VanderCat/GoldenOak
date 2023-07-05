@@ -1,4 +1,6 @@
-local lapis = require("lapis")
+local errors = require "errorList"
+local lapis = require "lapis"
+
 local app = lapis.Application()
 
 app:get("/", function()
@@ -12,5 +14,8 @@ app:get("/", function()
     }
   }
 end)
+function app:handle_404()
+  return errors.NotFound()
+end
 
 return app
