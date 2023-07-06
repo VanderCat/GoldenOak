@@ -9,5 +9,5 @@ local config = require("lapis.config").get()
 --- # Test endpoint
 return function(request)
     local id = uuid.generate()
-    return {json=uuid.parse(uuid.stringify(id, true))==id}
+    return {json=uuid.isUuid(uuid.stringify(id, true))}
 end

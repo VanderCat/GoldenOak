@@ -40,4 +40,13 @@ function uuid.parse(fancyUuid)
     return result
 end
 
+--TODO: add bit check
+--- @param fancyUuid string
+--- @return boolean isUuid
+function uuid.isUuid(fancyUuid)
+    local isDashed = fancyUuid:find("^%w%w%w%w%w%w%w%w%-%w%w%w%w%-%w%w%w%w%-%w%w%w%w%-%w%w%w%w%w%w%w%w%w%w%w%w$")
+    local monolith = fancyUuid:find("^%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w$")
+    return (monolith or isDashed) ~= nil
+end
+
 return uuid
