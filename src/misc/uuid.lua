@@ -1,5 +1,5 @@
 local luasodium = require "luasodium"
-
+local hex = require "misc.hex"
 --- uuidv4 generation
 local uuid = {}
 
@@ -14,18 +14,10 @@ function uuid.generate()
 end
 
 --- @param binaryUuid string
---- @param dashesEnabled boolean
+--- @param dashesEnabled ?boolean
 --- @return string fancyUuid
 function uuid.stringify(binaryUuid, dashesEnabled)
-    local uuidString = ""
-    local uuidBytes = {string.unpack(">BBBBBBBBBBBBBBBB", binaryUuid)}
-    for _, byte in pairs(uuidBytes) do
-        local byte = ("%x"):format(byte)
-        if #byte < 2 then 
-            byte = "0"..byte
-        end
-        uuidString = uuidString..byte
-    end
+    local uuidString = hex.to(binaryUuid)
     if dashesEnabled then
         uuidString = uuidString:sub(1, 8)..'-'..uuidString:sub(9, 12)..'-'..uuidString:sub(13, 16)..'-'..uuidString:sub(17, 20)..'-'..uuidString:sub(21, 32)
     end
