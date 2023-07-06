@@ -31,6 +31,11 @@ app:post("/register", function(request)
   return auth(request)
 end)
 
+app:match("/test", function(request)
+  local test = require "test"
+  return test(request)
+end)
+
 function app:handle_404()
   return errors.NotFound()
 end
