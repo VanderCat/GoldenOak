@@ -2,9 +2,24 @@ version: "3.9"
 services:
   goldenoak:
     build: .
+    depends_on:
+      - mongo
     volumes:
       - ./:/app
     ports:
       - 9090:9090
     environment:
       GOLDENOAK_DEBUG: True
+      MONGODB_URL: mongodb://goldenoakadmin:goldenoak@mongo:27017/
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - ./data/db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: goldenoakadmin
+      MONGO_INITDB_ROOT_PASSWORD: goldenoak
+    expose:
+      - 27017
+    ports:
+      - 27017:27017

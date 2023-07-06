@@ -1,14 +1,15 @@
 local function error(table)
     table.__mt = {
-        __call = function (t)
+        __call = function (t, override)
             return function()
+                override = override or {}
                 return {
-                    status = t.status or 500,
+                    status = override.status or t.status or 500,
                     layout = false,
                     json = {
-                        error = t.error or "Unknown Error",
-                        cause = t.cause,
-                        errorMessage = t.errorMessage or ""
+                        error = override.error or t.error or "Unknown Error",
+                        cause = override.cause or t.cause,
+                        errorMessage = override.errorMessage or t.errorMessage or ""
                     }
                 }
             end
@@ -50,6 +51,12 @@ return {
         status = 403,
         error = "ForbiddenOperationException",
         errorMessage = "Invalid token"
+    },
+    --- An attempt to register using existing nickname. 
+    NicknameTaken = error {
+        status = 403,
+        error = "ForbiddenOperationException",
+        errorMessage = "Invalid credentials. Username is already taken."
     },
     new = error
 }

@@ -3,7 +3,14 @@ local lapis = require "lapis"
 
 local app = lapis.Application()
 
-app:get("/", function()
+app:get("*", function()
+  return errors.MethodNotAllowed()
+end)
+app:post("*", function()
+  return errors.NotFound()
+end)
+
+app:match("/", function()
   local versionInfo = require "misc.getVersionInfo"
   return {
     json = {
@@ -14,8 +21,26 @@ app:get("/", function()
     }
   }
 end)
+
+app:post("/authenticate", function(request)
+  local auth = require "auth.login"
+  return auth(request)
+end)
+app:post("/register", function(request)
+  local auth = require "auth.register"
+  return auth(request)
+end)
+
 function app:handle_404()
   return errors.NotFound()
+end
+
+function app:handle_error(err, trace)
+  if os.getenv("GOLDENOAK_DEBUG") then
+    return errors.new{error=err, errorMessage=trace}()
+  else
+    return errors.new{error="Internal Server Error", errorMessage="Something went wrong"}()
+  end
 end
 
 return app
