@@ -43,7 +43,11 @@ return function (request)
     end
     response.clientToken = newClientToken and uuid.stringify(clientToken, true) or clientToken
     
-    response.accessToken = "" --TODO: Generate
+    local accessToken, err = auth.generateAccessToken(user.uuid[1])
+    if  not accessToken then
+        error(err)
+    end
+    response.accessToken = accessToken
 
     local profile = {
         id = uuid.stringify(user.uuid[1], true),

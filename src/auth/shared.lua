@@ -1,5 +1,8 @@
+local mongo = require 'mongo'
+local uuid = require "misc.uuid"
 local config = require("lapis.config").get()
 local luasodium = require "luasodium"
+local hex       = require "misc.hex"
 
 local shared = {
     checks = {}
@@ -71,6 +74,32 @@ function shared.checks.username(username)
         return false, "Username is too big"
     end
     return true
+end
+
+--- ### Generate Access Token
+--- See: tokenSpecification.md  
+--- `"User not found"` can also mean userUuid is not an UUID
+--- @param password string 
+--- @return string? error
+--- @return string? token
+function shared.generateAccessToken(userUuid)
+    -- TODO: use more complex uuid check
+    if uuid.isUuid(userUuid) then
+        userUuid = uuid.parse(userUuid)
+    end
+    --check if user exists just in case
+    local usersDb = config.db:getCollection('goldenoak', 'users')
+    local user, err = usersDb:findOne{uuid=mongo.Binary(userUuid,4)}
+    if not user then
+        return nil, "User not found"
+    end
+
+    local expirationDate = os.time() + os.time{year=1970, month=0, day=7, hour=0} -- TODO: Make configurable
+    local dashlessUuid = uuid.stringify(userUuid)
+    local token = {"go", expirationDate, dashlessUuid}
+    local sign = luasodium.crypto_sign_detached(table.concat(token), config.secretKey)
+    -- TODO: Convert to base64
+    return table.concat(token, ".").."."..hex.to(sign)
 end
 
 return shared

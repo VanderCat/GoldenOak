@@ -41,6 +41,8 @@ function app:handle_404()
 end
 
 function app:handle_error(err, trace)
+  print(err)
+  print(trace)
   if os.getenv("GOLDENOAK_DEBUG") then
     return errors.new{error=err, errorMessage=trace}()
   else
