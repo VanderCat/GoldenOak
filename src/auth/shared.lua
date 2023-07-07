@@ -169,7 +169,7 @@ function shared.getToken(accessToken, clientToken)
             cause = err
         }
     end
-    if clientToken then
+    if type(clientToken) == "string" then
         local valid, err = shared.checks.clientToken(clientToken)
         if not valid then
             return nil, errors.InvalidToken {
@@ -198,6 +198,17 @@ function shared.getToken(accessToken, clientToken)
         }
     end
     return tokenDocument
+end
+
+function shared.invalidateToken(accessToken)
+    local tokensDb = config.db:getCollection('goldenoak', 'tokens')
+    local result, err = tokensDb:updateOne({accessToken = accessToken}, {["$set"]={valid=false, expirationDate=mongo.DateTime(math.floor(socket.gettime()*1000))}})
+    if not result then
+        return false, errors.InvalidToken {
+            cause = "Access Token no longer exist"
+        }
+    end
+    return true
 end
 
 return shared

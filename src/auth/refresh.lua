@@ -42,9 +42,9 @@ return function (request)
     
     response.clientToken = body.clientToken
     response.accessToken = auth.generateAccessToken(tokenDocument.owner[1], body.clientToken)
-    local result, err = config.db:getCollection('goldenoak', 'tokens'):updateOne({accessToken = body.accessToken}, {["$set"]={valid=false, expirationDate=mongo.DateTime(math.floor(socket.gettime()*1000))}})
-    if not result then
-        error(err)
+    local result, err = auth.invalidateToken(body.accessToken)
+    if err then
+        return err
     end
 
     return {json=response}
