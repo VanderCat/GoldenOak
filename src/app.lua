@@ -42,6 +42,10 @@ app:post("/invalidate", function(request)
   local auth = require "auth.invalidate"
   return auth(request)
 end)
+app:post("/signout", function(request)
+  local auth = require "auth.logout"
+  return auth(request)
+end)
 
 app:match("/test", function(request)
   local test = require "test"
