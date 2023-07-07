@@ -3,6 +3,7 @@ local uuid = require "misc.uuid"
 local config = require("lapis.config").get()
 local luasodium = require "luasodium"
 local hex       = require "misc.hex"
+local socket = require "socket"
 
 local shared = {
     checks = {}
@@ -26,7 +27,7 @@ end
 --- @param hash string 
 --- @param string string
 --- @return boolean checkPassed
-function shared.checkHash(hash, string)
+function shared.checks.hash(hash, string)
     return shared.createHash(string) == hash
 end
 
@@ -47,6 +48,27 @@ function shared.checks.password(password)
     end
     if length > 64 then
         return false, "Password is too big"
+    end
+    return true
+end
+--- ### Check client token
+--- subject to change, idk about mojang limits
+--- @param clientToken string 
+--- @return boolean checkPassed
+--- @return string? cause
+function shared.checks.clientToken(clientToken)
+    if not clientToken then
+        return false, "Missing Client Token"
+    end
+    local length = #clientToken
+    if clientToken == "" then
+        return false, "Client Token cannot be empty"
+    end
+    if length < 8 then
+        return false, "Client Token is too short"
+    end
+    if length > 64 then
+        return false, "Client Token is too big"
     end
     return true
 end
@@ -79,9 +101,10 @@ end
 --- ### Generate Access Token
 --- See: tokenSpecification.md  
 --- `"User not found"` can also mean userUuid is not an UUID
---- @param password string 
---- @return string? error
+--- @param userUuid string 
+--- @param clientToken string 
 --- @return string? token
+--- @return string? error
 function shared.generateAccessToken(userUuid, clientToken)
     -- TODO: use more complex uuid check
     if uuid.isUuid(userUuid) then
@@ -94,8 +117,8 @@ function shared.generateAccessToken(userUuid, clientToken)
         return nil, "User not found"
     end
 
-    local creationDate = os.time()
-    local expirationDate = creationDate + os.time{year=1970, month=0, day=7, hour=0} -- TODO: Make configurable
+    local creationDate = math.floor(socket.gettime()*1000)
+    local expirationDate = creationDate + 604800000 -- TODO: Make configurable
     local dashlessUuid = uuid.stringify(userUuid)
     local token = {"go", expirationDate, dashlessUuid}
     local sign = luasodium.crypto_sign_detached(table.concat(token), config.secretKey)
@@ -107,13 +130,35 @@ function shared.generateAccessToken(userUuid, clientToken)
         _id = mongo.ObjectID(),
         owner = mongo.Binary(userUuid, 4),
         accessToken = tokenString,
-        creationDate = mongo.DateTime(creationDate*1000),
+        creationDate = mongo.DateTime(creationDate),
         clientToken = mongo.Binary(clientToken, 128), -- it is not necessary uuid so it will be saved as cusom binary
-        expirationDate = mongo.DateTime(expirationDate*1000),
+        expirationDate = mongo.DateTime(expirationDate),
         valid = true,
     }
 
     return tokenString
+end
+
+--- Check access token
+--- @param accessToken string 
+--- @return boolean valid
+--- @return string? error
+function shared.checks.accessToken(accessToken)
+    if not accessToken then
+        return false, "Access Token is nil"
+    end
+    local split = accessToken:split(".")
+    if split[1] ~= "go" then
+        return false, "Access Token is invalid"
+    end
+    if tonumber(split[2]) < math.floor(socket.gettime()*1000) then
+        return false, "Access Token is expired"
+    end
+    local signature = hex.from(table.remove(split, 4))
+    if not ((#signature == luasodium.crypto_sign_BYTES) and ( luasodium.crypto_sign_verify_detached(signature, table.concat(split), config.publicKey))) then
+        return false, "Signature is not valid"
+    end
+    return true
 end
 
 return shared

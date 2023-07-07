@@ -1,3 +1,5 @@
+require "misc.luaExtensions"
+
 local config = require "lapis.config"
 local luasodium = require "luasodium"
 

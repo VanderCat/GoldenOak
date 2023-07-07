@@ -28,7 +28,7 @@ return function (request)
         return errors.InvalidCredentials()
     end
     user = user:value()
-    local correctPassword = auth.checkHash(user.password[1], body.password)
+    local correctPassword = auth.checks.hash(user.password[1], body.password)
     if not correctPassword then
         return errors.InvalidCredentials()
     end
@@ -40,6 +40,13 @@ return function (request)
         --TODO: Invalidate all tokens? not sure...
         clientToken = uuid.generate()
         newClientToken = true
+    else
+        local valid, err = auth.checks.clientToken(clientToken)
+        if not valid then
+            return errors.InvalidToken {
+                cause = err
+            }
+        end
     end
     response.clientToken = newClientToken and uuid.stringify(clientToken, true) or clientToken
     

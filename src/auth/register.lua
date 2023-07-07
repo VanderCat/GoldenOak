@@ -5,6 +5,7 @@ local cjson = require "cjson"
 local luasodium = require "luasodium"
 local auth = require "auth.shared"
 local config = require("lapis.config").get()
+local socket = require "socket"
 
 return function (request)
     local body = cjson.decode(request.req:read_body_as_string())
@@ -30,7 +31,7 @@ return function (request)
         uuid = mongo.Binary(uuid.generate(), 4),
         username = body.username,
         password = mongo.Binary(hash, 128),
-        registrationDate = mongo.DateTime(os.time()*1000)
+        registrationDate = mongo.DateTime(socket.gettime()*1000)
     }
     if not result then
         error(err)
