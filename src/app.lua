@@ -34,6 +34,10 @@ app:post("/refresh", function(request)
   local auth = require "auth.refresh"
   return auth(request)
 end)
+app:post("/validate", function(request)
+  local auth = require "auth.validate"
+  return auth(request)
+end)
 
 app:match("/test", function(request)
   local test = require "test"
