@@ -82,7 +82,7 @@ end
 --- @param password string 
 --- @return string? error
 --- @return string? token
-function shared.generateAccessToken(userUuid)
+function shared.generateAccessToken(userUuid, clientToken)
     -- TODO: use more complex uuid check
     if uuid.isUuid(userUuid) then
         userUuid = uuid.parse(userUuid)
@@ -94,12 +94,26 @@ function shared.generateAccessToken(userUuid)
         return nil, "User not found"
     end
 
-    local expirationDate = os.time() + os.time{year=1970, month=0, day=7, hour=0} -- TODO: Make configurable
+    local creationDate = os.time()
+    local expirationDate = creationDate + os.time{year=1970, month=0, day=7, hour=0} -- TODO: Make configurable
     local dashlessUuid = uuid.stringify(userUuid)
     local token = {"go", expirationDate, dashlessUuid}
     local sign = luasodium.crypto_sign_detached(table.concat(token), config.secretKey)
-    -- TODO: Convert to base64
-    return table.concat(token, ".").."."..hex.to(sign)
+
+    local tokenString = table.concat(token, ".").."."..hex.to(sign)
+
+    local tokensDb = config.db:getCollection('goldenoak', 'tokens')
+    tokensDb:insert{
+        _id = mongo.ObjectID(),
+        owner = mongo.Binary(userUuid, 4),
+        accessToken = tokenString,
+        creationDate = mongo.DateTime(creationDate*1000),
+        clientToken = mongo.Binary(clientToken, 128), -- it is not necessary uuid so it will be saved as cusom binary
+        expirationDate = mongo.DateTime(expirationDate*1000),
+        valid = true,
+    }
+
+    return tokenString
 end
 
 return shared

@@ -43,7 +43,7 @@ return function (request)
     end
     response.clientToken = newClientToken and uuid.stringify(clientToken, true) or clientToken
     
-    local accessToken, err = auth.generateAccessToken(user.uuid[1])
+    local accessToken, err = auth.generateAccessToken(user.uuid[1], response.clientToken)
     if  not accessToken then
         error(err)
     end
