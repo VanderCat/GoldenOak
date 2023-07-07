@@ -4,6 +4,7 @@ local config = require("lapis.config").get()
 local luasodium = require "luasodium"
 local hex       = require "misc.hex"
 local socket = require "socket"
+local errors = require "errorList"
 
 local shared = {
     checks = {}
@@ -159,6 +160,44 @@ function shared.checks.accessToken(accessToken)
         return false, "Signature is not valid"
     end
     return true
+end
+
+function shared.getToken(accessToken, clientToken)
+    local valid, err = shared.checks.accessToken(accessToken)
+    if not valid then
+        return nil, errors.InvalidToken {
+            cause = err
+        }
+    end
+    if clientToken then
+        local valid, err = shared.checks.clientToken(clientToken)
+        if not valid then
+            return nil, errors.InvalidToken {
+                cause = err
+            }
+        end
+    end
+    local tokensDb = config.db:getCollection('goldenoak', 'tokens')
+    local tokenDocument, err = tokensDb:findOne{accessToken = accessToken}
+    if not tokenDocument then
+        return nil, errors.InvalidToken {
+            cause = "Access Token does not exist"
+        }
+    end
+    tokenDocument = tokenDocument:value()
+    if clientToken then
+        if tokenDocument.clientToken[1] ~= clientToken then
+            return tokenDocument, errors.InvalidToken {
+                cause = "Access Token was given to another client"
+            }
+        end
+    end
+    if not tokenDocument.valid then
+        return tokenDocument, errors.InvalidToken {
+            cause = "Access Token was invalidated"
+        }
+    end
+    return tokenDocument
 end
 
 return shared

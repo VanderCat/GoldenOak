@@ -14,36 +14,9 @@ return function (request)
     local body = cjson.decode(request.req:read_body_as_string())
     local response = {}
 
-    local valid, err = auth.checks.accessToken(body.accessToken)
-    if not valid then
-        return errors.InvalidToken {
-            cause = err
-        }
-    end
-    local valid, err = auth.checks.clientToken(body.clientToken)
-    if not valid then
-        return errors.InvalidToken {
-            cause = err
-        }
-    end
-    local tokensDb = config.db:getCollection('goldenoak', 'tokens')
-    local tokenDocument, err = tokensDb:findOne{accessToken = body.accessToken}
-    if not tokenDocument then
-        print(err)
-        return errors.InvalidToken {
-            cause = "Access Token does not exist"
-        }
-    end
-    tokenDocument = tokenDocument:value()
-    if tokenDocument.clientToken[1] ~= body.clientToken then
-        return errors.InvalidToken {
-            cause = "Access Token was given to another client"
-        }
-    end
-    if not tokenDocument.valid then
-        return errors.InvalidToken {
-            cause = "Access Token was invalidated"
-        }
+    local tokenDocument, error = auth.getToken(body.accessToken, body.clientToken)
+    if error then
+        return error
     end
 
     local usersDb = config.db:getCollection('goldenoak', 'users')
@@ -69,7 +42,7 @@ return function (request)
     
     response.clientToken = body.clientToken
     response.accessToken = auth.generateAccessToken(tokenDocument.owner[1], body.clientToken)
-    local result, err = tokensDb:updateOne({accessToken = body.accessToken}, {["$set"]={valid=false, expirationDate=mongo.DateTime(math.floor(socket.gettime()*1000))}})
+    local result, err = config.db:getCollection('goldenoak', 'tokens'):updateOne({accessToken = body.accessToken}, {["$set"]={valid=false, expirationDate=mongo.DateTime(math.floor(socket.gettime()*1000))}})
     if not result then
         error(err)
     end
