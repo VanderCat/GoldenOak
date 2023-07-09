@@ -50,6 +50,9 @@ end)
 app:put("/changename/:name", function(request)
   return require "user.changeName" (request)
 end)
+app:get("/checkname/:name", function(request)
+  return require "user.nameAvailable" (request)
+end)
 
 app:match("/test", function(request)
   local test = require "test"

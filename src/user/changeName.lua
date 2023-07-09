@@ -44,4 +44,9 @@ return function (request)
     if err then
         error(err)
     end
+    return {json={
+        name = newName,
+        skins = cjson.cjson.empty_array,
+        capes = cjson.cjson.empty_array --TODO: Skins and capes
+    }}
 end
