@@ -31,7 +31,7 @@ return function (request)
         uuid = mongo.Binary(uuid.generate(), 4),
         username = body.username,
         password = mongo.Binary(hash, 128),
-        registrationDate = mongo.DateTime(socket.gettime()*1000)
+        registrationDate = mongo.DateTime(math.floor(socket.gettime()*1000))
     }
     if not result then
         error(err)
