@@ -3,6 +3,7 @@ local mongo = require 'mongo'
 local errors = require "errorList"
 local config = require("lapis.config").get()
 local auth = require "auth.shared"
+local socket = require "socket"
 
 return function (request)
     --- @type string
@@ -28,10 +29,18 @@ return function (request)
     end
 
     local usersDb = config.db:getCollection('goldenoak', 'users')
+    local user = usersDb:findOne({uuid=mongo.Binary(token.owner[1], 4)})
     if usersDb:findOne({username = request.params.name}) then
         return errors.NicknameTaken()
     end
-    local user, err = usersDb:updateOne({uuid=mongo.Binary(token.owner[1], 4)}, {["$set"]={username = request.params.name}})
+    local user, err = usersDb:updateOne({uuid=mongo.Binary(token.owner[1], 4)}, {
+        ["$set"]={
+            username = request.params.name,
+            lastUsernameChangeDate = mongo.DateTime(math.floor(socket.gettime()*1000))
+        }, ["$addToSet"]={
+            previousNames=user:value().username
+        }
+    })
     if err then
         error(err)
     end
