@@ -1,6 +1,6 @@
 --- Returns table with string separated by sep (supports lua patterns)
 ---@param s string
----@param sep string lua pattern
+---@param sep ?string lua pattern
 ---@return table<string>
 function string.split (s, sep)
     if sep == nil then

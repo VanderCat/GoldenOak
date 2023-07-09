@@ -47,6 +47,10 @@ app:post("/signout", function(request)
   return auth(request)
 end)
 
+app:put("/changename/:name", function(request)
+  return require "user.changeName" (request)
+end)
+
 app:match("/test", function(request)
   local test = require "test"
   return test(request)
