@@ -46,7 +46,7 @@ return function (request)
     end
     return {json={
         name = newName,
-        skins = cjson.cjson.empty_array,
-        capes = cjson.cjson.empty_array --TODO: Skins and capes
+        skins = cjson.empty_array,
+        capes = cjson.empty_array --TODO: Skins and capes
     }}
 end
