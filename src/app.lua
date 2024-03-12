@@ -54,6 +54,14 @@ app:get("/checkname/:name", function(request)
   return require "user.nameAvailable" (request)
 end)
 
+app:get("/session/minecraft/hasJoined", function(request)
+  return require "session.hasJoined" (request)
+end)
+
+app:post("/session/minecraft/join", function(request)
+  return require "session.join" (request)
+end)
+
 app:match("/test", function(request)
   local test = require "test"
   return test(request)

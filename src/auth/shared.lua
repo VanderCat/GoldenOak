@@ -177,6 +177,11 @@ function shared.getToken(accessToken, clientToken)
             }
         end
     end
+    local tokenDocument, err =  shared.accessTokenDb(accessToken, clientToken)
+    return tokenDocument, err
+end
+
+function shared.accessTokenDb(accessToken, clientToken)
     local tokensDb = config.db:getCollection('goldenoak', 'tokens')
     local tokenDocument, err = tokensDb:findOne{accessToken = accessToken}
     if not tokenDocument then
@@ -197,7 +202,7 @@ function shared.getToken(accessToken, clientToken)
             cause = "Access Token was invalidated"
         }
     end
-    return tokenDocument
+    return tokenDocument, nil, false
 end
 
 function shared.invalidateToken(accessToken)
