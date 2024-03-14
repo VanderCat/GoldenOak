@@ -3,9 +3,10 @@ local lapis = require "lapis"
 
 local app = lapis.Application()
 
-app:get("*", function()
+app:match("*", function()
   return errors.MethodNotAllowed()
 end)
+
 app:post("*", function()
   return errors.NotFound()
 end)
@@ -60,6 +61,10 @@ end)
 
 app:post("/session/minecraft/join", function(request)
   return require "session.join" (request)
+end)
+
+app:get("/session/minecraft/profile/:uuid", function(request)
+  return require "session.profile" (request)
 end)
 
 app:match("/test", function(request)
