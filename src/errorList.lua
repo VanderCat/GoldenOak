@@ -58,5 +58,9 @@ return {
         error = "ForbiddenOperationException",
         errorMessage = "Invalid credentials. Username is already taken."
     },
+    InvalidSession = error {
+        status = 403,
+        error = "ForbiddenOperationException"
+    },
     new = error
 }

@@ -9,11 +9,11 @@ local uuid = require "misc.uuid"
 return function (request)
     local username = request.params.username
     if (username == nil) then 
-        return errors.NotFound()
+        return errors.InvalidSession()
     end
     local serverId = request.params.serverId
     if (serverId == nil) then
-        return errors.NotFound()
+        return errors.InvalidSession()
     end
     local ip = request.params.id
 
@@ -32,5 +32,5 @@ return function (request)
             }
         }}
     end
-    return errors.InvalidCredentials()
+    return errors.InvalidSession()
 end

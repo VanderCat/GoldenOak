@@ -11,18 +11,18 @@ return function (request)
     local accessToken = body.accessToken
     local check, err = auth.checks.accessToken(accessToken)
     if not check then 
-        return errors.InvalidToken{errorMessage=err}
+        return errors.InvalidSession{errorMessage=err}
     end
     local id = body.selectedProfile
     if not id then 
-        return errors.InvalidCredentials{errorMessage="uuid is  missing"}
+        return errors.InvalidSession{errorMessage="uuid is  missing"}
     end
     if not uuid.isUuid(id) then
-        return errors.InvalidCredentials{errorMessage="uuid is not correct"}
+        return errors.InvalidSession{errorMessage="uuid is not correct"}
     end
     local serverId = body.serverId
     if not serverId then
-        return errors.NotFound({errorMessage="no serverId"})
+        return errors.InvalidSession({errorMessage="no serverId"})
     end
     local token, err = auth.getToken(accessToken)
     if err then
@@ -35,7 +35,7 @@ return function (request)
     end
     user = user:value()
     if uuid.stringify(user.uuid[1]) ~= id then
-        return errors.InvalidToken({errorMessage="Token was given to another user."})
+        return errors.InvalidSession({errorMessage="Token was given to another user."})
     end
     local serversDb = config.db:getCollection('goldenoak', 'servers')
     serversDb:insert{
