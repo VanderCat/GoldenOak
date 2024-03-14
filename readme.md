@@ -12,6 +12,10 @@ See: https://wiki.vg/Legacy_Mojang_Authentication
 ### `POST` /invalidate
 ### `POST` /signout
 ### `PUT` /changename/:newname
+### `PUT` /checkname/:name
+### `POST` /session/minecraft/join
+### `GET` /session/minecraft/hasJoined
+### `GET` /session/minecraft/profile/:uuid
 
 ## Why?
 - Because i want to know how auth works
