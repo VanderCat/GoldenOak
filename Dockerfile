@@ -18,6 +18,10 @@ RUN luarocks install luasodium
 RUN pacman -Sy --noconfirm mongo-c-driver icu
 RUN luarocks install lua-mongo
 
+#RUN luarocks install lil
+
+RUN luarocks install luafilesystem
+
 # Copy projdir
 WORKDIR /app
 COPY . .
