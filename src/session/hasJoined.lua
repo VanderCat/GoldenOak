@@ -4,6 +4,7 @@ local errors = require "errorList"
 local config = require("lapis.config").get()
 local auth = require "auth.shared"
 local socket = require "socket"
+local uuid = require "misc.uuid"
 
 return function (request)
     local username = request.params.username
@@ -19,7 +20,17 @@ return function (request)
     local serversDb = config.db:getCollection('goldenoak', 'servers')
     local userRecord = serversDb:findOne({username=username})
     if userRecord then
-        return
+        return {json={
+            id = uuid.stringify(config.db:getCollection('goldenoak', 'users'):findOne({username=username}):value().uuid[1]),
+            name = username,
+            properties = {
+                {
+                    name = "textures",
+                    value = "",
+                    signature = "<base64 string; signed data using Yggdrasil's private key>"
+                }
+            }
+        }}
     end
     return errors.InvalidCredentials()
 end

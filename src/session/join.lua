@@ -40,7 +40,7 @@ return function (request)
     local serversDb = config.db:getCollection('goldenoak', 'servers')
     serversDb:insert{
         _id = mongo.ObjectID(),
-        username = string.lower(user.username),
+        username = user.username,
         serverId = serverId
     }
     return {status=204}
