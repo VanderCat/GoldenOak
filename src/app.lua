@@ -47,6 +47,9 @@ app:post("/signout", function(request)
   local auth = require "auth.logout"
   return auth(request)
 end)
+app:post("/changepassword", function(request)
+  return require "auth.changePassword" (request)
+end)
 
 app:put("/changename/:name", function(request)
   return require "user.changeName" (request)

@@ -11,6 +11,15 @@ See: https://wiki.vg/Legacy_Mojang_Authentication
 ### `POST` /validate
 ### `POST` /invalidate
 ### `POST` /signout
+### `POST` /changepassword
+// custom made, not present on wiki.vg
+```json
+{
+    "username": "test",
+    "password": "testing123",
+    "newPassword": "testingtesting123"
+}
+```
 ### `PUT` /changename/:newname
 ### `PUT` /checkname/:name
 ### `POST` /session/minecraft/join
