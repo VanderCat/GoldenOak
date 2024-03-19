@@ -18,8 +18,7 @@ return function (request)
     if userRecord then
         userRecord = userRecord:value()
         return {json={
-            legacy = false,
-            id = uuid,
+            id = uuid.stringify(userRecord.uuid[1], true),
             name = userRecord.username,
             properties = {
                 {
